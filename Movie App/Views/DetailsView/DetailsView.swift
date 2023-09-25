@@ -11,6 +11,7 @@ struct DetailsView: View {
     
     @StateObject private var viewModel = DetailsViewModel()
     @Environment(\.dismiss) var dismiss
+    // Learned: Environment Object cannot be nested in a class, only views (ie structs)
     @EnvironmentObject var tabBarPresenter: TabBarPresenter
 
     var body: some View {

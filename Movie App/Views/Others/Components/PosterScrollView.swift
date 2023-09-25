@@ -20,7 +20,7 @@ struct PosterScrollView: View {
         ScrollView(.vertical, showsIndicators: false) {
             LazyVGrid(columns: gridColumn, spacing: 20) {
                 ForEach(0...10, id: \.self) { index in
-                    PosterView(poster: index % 2 == 0 ? Image("Avengers Poster") : Image("Elemental Poster"))
+                    PosterView(poster: nil)
                         .onTapGesture { accessPosterView() }
                 }
             }

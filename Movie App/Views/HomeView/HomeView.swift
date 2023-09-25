@@ -24,6 +24,7 @@ struct HomeView: View {
                         
                         TypeText("Series", edge: .leading, selection: 1)
                     }
+                    
                     ScrollView(.vertical, showsIndicators: false)  {
                         VStack(spacing: 25) {
                             
@@ -37,11 +38,12 @@ struct HomeView: View {
                                 // MARK: Trending Movies Slider
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 10) {
-                                        ForEach(0...5, id: \.self) { index in
-                                            PosterView(width: 170, height: 250, cornerRadius: 10)
+                                        ForEach(viewModel.contents) { content in
+                                            PosterView(poster: nil, width: 170, height: 250, cornerRadius: 10)
                                                 .onTapGesture { viewModel.accessPosterView() }
                                         }
                                     }
+                                    .padding(.horizontal)
                                 }
                             }
                             
@@ -65,8 +67,8 @@ struct HomeView: View {
                                 }
                                 
                                 LazyVGrid(columns: viewModel.gridColumn, spacing: 15) {
-                                    ForEach(0...10, id: \.self) { index in
-                                        PosterView(width: 111, height: 164, cornerRadius: 10)
+                                    ForEach(viewModel.contents) { content in
+                                        PosterView(poster: nil, width: 111, height: 164, cornerRadius: 10)
                                             .onTapGesture { viewModel.accessPosterView() }
                                     }
                                 }
@@ -84,6 +86,12 @@ struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .bottomBar)
+        .onAppear {
+            Task {
+                await viewModel.loadContentAsync()
+            }
+        }
+
         
     }
     

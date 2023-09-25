@@ -10,7 +10,6 @@ import SwiftUI
 final class DetailsViewModel: ObservableObject {
     // TODO: For now keep it a variable
     @Published var isFavorite: Bool = false
-    @EnvironmentObject var tabBarPresenter: TabBarPresenter
     
     var genres: [String] = ["Action", "Drama", "Sci-fi", "Superhero"]
     

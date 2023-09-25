@@ -11,7 +11,9 @@ import SwiftUI
         @Published var isPresent: Bool = true
         
         func updatePresentState() {
-            isPresent.toggle()
+            withAnimation {
+                isPresent.toggle()
+            }
         }
     }
 
@@ -53,7 +55,7 @@ struct RootView: View {
             .edgesIgnoringSafeArea(.bottom)
             .frame(height: 40)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .offset(y: tabBarPresenter.isPresent ? 0 : 50)
+            .offset(y: tabBarPresenter.isPresent ? 0 : 100)
         }
         .environmentObject(tabBarPresenter)
     }

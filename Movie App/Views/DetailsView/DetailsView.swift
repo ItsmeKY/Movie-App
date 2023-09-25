@@ -11,7 +11,8 @@ struct DetailsView: View {
     
     @StateObject private var viewModel = DetailsViewModel()
     @Environment(\.dismiss) var dismiss
-    
+    @EnvironmentObject var tabBarPresenter: TabBarPresenter
+
     var body: some View {
         GeometryReader { geometryProxy in
             ZStack {
@@ -168,7 +169,8 @@ struct DetailsView: View {
                     .onTapGesture { dismiss() }
             }
         }
-//        .onAppear { viewModel.tabBarPresenter.updatePresentState() }
+        .onAppear { tabBarPresenter.updatePresentState() }
+        .onDisappear { tabBarPresenter.updatePresentState() }
         .toolbar(.hidden)
     }
 

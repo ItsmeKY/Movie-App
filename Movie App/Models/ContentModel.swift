@@ -5,7 +5,7 @@
 //  Created by ItsmeKY3 on 9/25/23.
 //
 
-import Foundation
+import SwiftUI
 
 struct Short: Decodable {
     let short: ContentModel
@@ -17,7 +17,7 @@ struct ContentModel: Decodable, Identifiable {
     let url: URL
     let title: String
     let type: String
-    let poster: URL
+    let posterUrl: URL
     let description: String
     let aggregateRating: AggregateRating?
     let contentRating: String?
@@ -26,12 +26,11 @@ struct ContentModel: Decodable, Identifiable {
     let actor: [Individual]
     let director: [Individual]
     
-    
     enum CodingKeys: String, CodingKey {
         case url
         case title = "name"
         case type = "@type"
-        case poster = "image"
+        case posterUrl = "image"
         case description
         case aggregateRating
         case contentRating
@@ -40,6 +39,8 @@ struct ContentModel: Decodable, Identifiable {
         case actor
         case director
     }
+    
+    var poster: Image?
 }
 
 struct AggregateRating: Decodable {

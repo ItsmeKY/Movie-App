@@ -29,17 +29,18 @@ struct HomeView: View {
                         VStack(spacing: 25) {
                             
                             
+                            //MARK: Carousel View
                             VStack(alignment: .leading) {
                                 Text("Trending This Week")
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .padding(.leading)
                                 
-                                // MARK: Trending Movies Slider
+                                
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 10) {
                                         ForEach(viewModel.contents) { content in
-                                            PosterView(poster: nil, width: 170, height: 250, cornerRadius: 10)
+                                            PosterView(poster: content.poster, width: 170, height: 250, cornerRadius: 10)
                                                 .onTapGesture { viewModel.accessPosterView() }
                                         }
                                     }
@@ -66,10 +67,12 @@ struct HomeView: View {
                                     .padding(.leading)
                                 }
                                 
+                                
                                 LazyVGrid(columns: viewModel.gridColumn, spacing: 15) {
                                     ForEach(viewModel.contents) { content in
-                                        PosterView(poster: nil, width: 111, height: 164, cornerRadius: 10)
+                                        PosterView(poster: content.poster, width: 111, height: 164, cornerRadius: 10)
                                             .onTapGesture { viewModel.accessPosterView() }
+//                                          
                                     }
                                 }
                                 .padding(.horizontal, 5)
@@ -88,7 +91,7 @@ struct HomeView: View {
         .toolbar(.hidden, for: .bottomBar)
         .onAppear {
             Task {
-                await viewModel.loadContentAsync()
+//                await viewModel.loadContentConcurrent()
             }
         }
 
@@ -102,10 +105,10 @@ struct HomeView: View {
             .font(.footnote)
             .fontWeight(.medium)
             .padding(edge)
-            .foregroundColor(viewModel.selectedType == selection ? .primary : .secondary)
+            .foregroundColor(viewModel.selectedContentType == selection ? .primary : .secondary)
             .onTapGesture {
                 // TODO: with animation
-                viewModel.selectedType = selection
+                viewModel.selectedContentType = selection
             }
     }
 }

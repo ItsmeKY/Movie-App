@@ -11,9 +11,8 @@ final class HomeViewModel: ObservableObject {
     
     @Published var contents: [ContentModel] = []
     
-    @Published var selectedType: Int = 0
+    @Published var selectedContentType: Int = 0
     @Published var categorySelected: String = "All"
-    
     @Published var presentDetailsView: Bool = false
     
     
@@ -23,9 +22,8 @@ final class HomeViewModel: ObservableObject {
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0)
     ]
     let categories: [String] = ["All", "Action", "Thriller", "Romantic", "Adventure"]
-    
-    let contentsID: [String] = ["tt1517268",
-//                                "tt5971474", "tt10160976", "tt22687790", "tt10638522",
+    private let contentsID: [String] = ["tt1517268",
+                                        "tt5971474", "tt10160976", "tt22687790", "tt10638522",
 //                                     "tt15398776", "tt9663764", "tt15354916", "tt15789038", "tt5537002",
 //                                     "tt17024450", "tt21276878", "tt14230458", "tt21454134", "tt15671028",
 //                                     "tt5814060", "tt1462764", "tt8589698", "tt15153532", "tt21103300",
@@ -46,7 +44,9 @@ final class HomeViewModel: ObservableObject {
 //                                     "tt16968450", "tt6710474", "tt15257160", "tt0361748", "tt7645334",
 //                                     "tt9639470", "tt13833688", "tt14362112", "tt1457767", "tt0082971"
 ]
-    let jsonDecoder = JSONDecoder()
+    private let jsonDecoder = JSONDecoder()
+
+    
     
     func isCategorySelected(_ category: String) -> Binding<Bool> {
         Binding<Bool> {
@@ -65,60 +65,44 @@ final class HomeViewModel: ObservableObject {
     
     
     /// Loads all the contents for all the existing content IDs cuncurrently
-    func loadContentConcurrent() async throws -> [ContentModel] {
-        try await withThrowingTaskGroup(of: ContentModel?.self) { group in
+    func loadContentConcurrent() async -> Void {
+        
+        var all: [ContentModel] = []
+        
+        try? await withThrowingTaskGroup(of: ContentModel?.self) { group in
             for contentID in contentsID {
                 group.addTask {
-                    let content = try? await self.parseContentJSON(contentID)
-                    return content
+                    // TODO: creates memory leak; work on this
+                    return try? await self.parseContentJSON(contentID)
                 }
             }
-            
-            var allContents: [ContentModel] = []
             
             for try await contentFound in group {
-                if let safeContent = contentFound {
-                    allContents.append(safeContent)
+                if var safeContent = contentFound {
+//                    safeContent.poster = self.loadImage(safeContent.posterUrl)
+                    all.append(safeContent)
                 }
             }
-            
-            return allContents
+            return
+        }
+        
+        DispatchQueue.main.async { [all] in
+            self.contents = all
         }
     }
     
-    /// Loads all the contents for all the existing content IDs asynchronously.
-    /// It happens to be faster than the concurrent method
-    func loadContentAsync() async -> Void {
-        // TODO: is it not better for memory to just append to the main func or would that cause many state changes affecting performace?
-        var allContent: [ContentModel] = []
-        
-        for contentID in contentsID {
-            
-            do {
-                let content = try await parseContentJSON(contentID)
-                allContent.append(content)
-            }
-            catch ParseError.invalidData {
-                print("Invalid Data")
-            }
-            catch ParseError.invalidURL {
-                print("Invalid URL")
-            }
-            catch ParseError.invalidResponse {
-                print("Invalid Response")
-            }
-            catch {
-                print("Unknown Error")
-            }
+    /// Loads Image from a given URL
+    private func loadImage(_ url: URL) -> Image? {
+        guard let data = try? Data(contentsOf: url),
+              let uiImage = UIImage(data: data) else {
+            return nil
         }
         
-        DispatchQueue.main.async { [allContent] in
-            self.contents = allContent
-        }
+        return Image(uiImage: uiImage)
     }
     
     /// Fetches the end point based on the movieID, decodes json as the Content Model
-    func parseContentJSON(_ contentID: String) async throws -> ContentModel {
+    private func parseContentJSON(_ contentID: String) async throws -> ContentModel {
         
         guard let url = URL(string: "https://search.imdbot.workers.dev/?tt=\(contentID)") else {
             throw ParseError.invalidURL
@@ -147,3 +131,41 @@ extension HomeViewModel {
 }
 
 
+
+
+
+
+
+/*
+ /// Loads all the contents for all the existing content IDs asynchronously.
+ /// Will be depricated
+ func loadContentAsync() async -> Void {
+     // TODO: is it not better for memory to just append to the main func or would that cause many state changes affecting performace?
+     var allContent: [ContentModel] = []
+     
+     for contentID in contentsID {
+         
+         do {
+             var content = try await parseContentJSON(contentID)
+//                content.poster = loadImage(content.posterUrl)
+             allContent.append(content)
+         }
+         catch ParseError.invalidData {
+             print("Invalid Data")
+         }
+         catch ParseError.invalidURL {
+             print("Invalid URL")
+         }
+         catch ParseError.invalidResponse {
+             print("Invalid Response")
+         }
+         catch {
+             print("Unknown Error")
+         }
+     }
+     
+     DispatchQueue.main.async { [allContent] in
+         self.contents = allContent
+     }
+ }
+ */

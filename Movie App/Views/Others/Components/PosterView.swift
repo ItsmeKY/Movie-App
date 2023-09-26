@@ -14,6 +14,7 @@ struct PosterView: View {
     private var height: CGFloat?
     private var cornerRadius: CGFloat
     
+    
     var body: some View {
         if poster != nil {
             poster?
@@ -22,9 +23,9 @@ struct PosterView: View {
                 .frame(width: width, height: height, alignment: .center)
                 .cornerRadius(cornerRadius)
         } else {
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .fill(Color.replacement)
+            Color.replacement
                 .frame(width: width, height: height, alignment: .center)
+                .cornerRadius(cornerRadius)
         }
     }
     
@@ -32,6 +33,13 @@ struct PosterView: View {
         self.poster = poster
         self.width = width
         self.height = height
+        self.cornerRadius = cornerRadius
+    }
+    
+    init(width: CGFloat, cornerRadius: CGFloat = 0) {
+        self.poster = nil
+        self.width = width
+        self.height = width * 1.47
         self.cornerRadius = cornerRadius
     }
 }

@@ -25,6 +25,7 @@ struct DetailsView: View {
                         //MARK: Poster
 
                         PosterView(poster: Image("Avengers Poster"))
+//                        PosterView(width: UIScreen.main.bounds.width, cornerRadius: 10)
                         .padding(.top, -97)
 
                         
@@ -151,7 +152,6 @@ struct DetailsView: View {
                         }
                         .padding(.horizontal)
                         
-                        Spacer()
                     }
                     .edgesIgnoringSafeArea(.top)
                 }

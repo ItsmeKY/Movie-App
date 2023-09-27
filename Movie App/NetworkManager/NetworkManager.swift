@@ -36,17 +36,18 @@ final class NetworkManager {
 ]
     private let jsonDecoder = JSONDecoder()
     
-    // Move to Singleton
-    // Make it return [ContentModel] and [Set of genre]
-    // (do on commit 2) Remove pagination of content info
+    // -- Move to Singleton
+    // -- Make it return [ContentModel] and [Set of genre]
+    // -- (do on commit 2) Remove pagination of content info
     // You may keep it for loading images however
-    /// Loads all the contents for all the existing content IDs cuncurrently
-    func loadContentConcurrent(start startIndex: Int, end endIndex: Int) async -> ([ContentModel], Set<String>) {
+    /// Loads all the contents for all the existing content IDs cuncurrently, and also returns a list of unique genres found in the contents
+    func loadContentConcurrent() async -> ([ContentModel], [String]) {
         var all: [ContentModel] = []
-        var genre: Set<String> = Set(arrayLiteral: "All")
+        var genres: Set<String> = Set()
+        var idTracker: Int = 0
         
         try? await withThrowingTaskGroup(of: ContentModel?.self) { group in
-            for contentID in contentsID[startIndex..<endIndex] {
+            for contentID in contentsID {
                 group.addTask {
                     // TODO: creates memory leak; work on this
                     return try? await self.parseContentJSON(contentID)
@@ -54,11 +55,16 @@ final class NetworkManager {
             }
             
             for try await contentFound in group {
-                if let safeContent = contentFound {
+                if var safeContent = contentFound {
+                    // Setting Ids (so i dont use UUID and stop indexing)
+                    safeContent.id = idTracker
+                    idTracker += 1
+                    
                     all.append(safeContent)
                     
+                    // Finding Unique Genres
                     for i in safeContent.genre {
-                        genre.insert(i)
+                        genres.insert(i)
                     }
                     
                     print("data appended: \(all.count)")
@@ -67,10 +73,14 @@ final class NetworkManager {
             return
         }
         
-        return (all, genre)
+        var sortedGenres = Array(genres).sorted()
+        print(sortedGenres.count)
+        sortedGenres.insert("All", at: 0)
+        print(sortedGenres.count)
+        return (all, sortedGenres)
     }
     
-    // Move to Singleton
+    // -- Move to Singleton
     // Make another version that takes (name:) -> [ContentModel]
     /// Fetches the end point based on the movieID, decodes json as the Content Model
     private func parseContentJSON(_ contentID: String) async throws -> ContentModel {
@@ -94,7 +104,7 @@ final class NetworkManager {
         }
     }
     
-    // Move to Singleton
+    // -- Move to Singleton
     /// Downloads data from URL and returns an Image utilized from the data
     private func downloadImage(from url: URL) async -> Image? {
         guard let (data, _) = try? await URLSession.shared.data(from: url),
@@ -106,7 +116,7 @@ final class NetworkManager {
         
     }
     
-    // Move to Singleton
+    // -- Move to Singleton
     private enum ParseError: Error {
         case invalidURL
         case invalidResponse

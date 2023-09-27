@@ -11,9 +11,7 @@ struct Short: Decodable {
     let short: ContentModel
 }
 
-struct ContentModel: Decodable, Identifiable {
-    let id = UUID()
-    
+struct ContentModel: Decodable {
     let url: URL
     let title: String
     let type: String
@@ -26,6 +24,7 @@ struct ContentModel: Decodable, Identifiable {
     let actor: [Individual]
     let director: [Individual]
     
+    var id: Int = -1
     var poster: Image?
     var isFavorite: Bool = false
     

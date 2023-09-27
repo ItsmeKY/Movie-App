@@ -33,6 +33,8 @@ struct RootView: View {
 
             ZStack {
                 Color.tabBar
+                    .edgesIgnoringSafeArea(.bottom)
+                    .padding(.top, -15)
  
                 HStack {
                     Spacer()
@@ -44,7 +46,6 @@ struct RootView: View {
                     Spacer()
                 }
             }
-            .edgesIgnoringSafeArea(.bottom)
             .frame(height: 40)
             .frame(maxHeight: .infinity, alignment: .bottom)
             .offset(y: tabBarPresenter.presentTabBar ? 0 : 100)

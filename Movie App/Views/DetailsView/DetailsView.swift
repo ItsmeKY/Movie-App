@@ -10,10 +10,21 @@ import SwiftUI
 struct DetailsView: View {
     
     @StateObject private var viewModel = DetailsViewModel()
-    @Environment(\.dismiss) var dismiss
     // Learned: Environment Object cannot be nested in a class, only views (ie structs)
     @EnvironmentObject var tabBarPresenter: TabBarPresenter
 
+    private var content: ContentModel
+    private var index: Int
+    private var dismiss: () -> Void
+    private var favoriteStatusUpdate: (Int, Bool) -> Void
+    
+    init(content: ContentModel, index: Int, dismiss: @escaping () -> Void, track: @escaping (Int, Bool) -> Void) {
+        self.content = content
+        self.index = index
+        self.dismiss = dismiss
+        self.favoriteStatusUpdate = track
+    }
+    
     var body: some View {
         GeometryReader { geometryProxy in
             ZStack {
@@ -24,9 +35,9 @@ struct DetailsView: View {
                     VStack(spacing: 20) {
                         //MARK: Poster
 
-                        PosterView(poster: Image("Avengers Poster"))
-//                        PosterView(width: UIScreen.main.bounds.width, cornerRadius: 10)
-                        .padding(.top, -97)
+//                        PosterView(poster: content.poster)
+                        PosterView(poster: content.poster)
+                            .padding(.top, -97)
 
                         
                         HStack(spacing: 10) {
@@ -49,18 +60,20 @@ struct DetailsView: View {
                             
                             //MARK: Ranking and Views
                             HStack(spacing: 5) {
+                                if let rating = content.aggregateRating {
                                     Image(systemName: "star.fill")
                                         .font(.subheadline)
                                         .foregroundColor(.alertYellow)
-                                
-                                Text(String(5.0))
-                                    .fontWeight(.heavy)
-                                    .foregroundColor(.alertYellow)
-                                
-                                Text("(205k reviews)")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                    .opacity(0.8)
+                                    
+                                    Text(String(rating.ratingValue))
+                                        .fontWeight(.heavy)
+                                        .foregroundColor(.alertYellow)
+                                    
+                                    Text("(\(rating.ratingCount.letterFormat()) reviews)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .opacity(0.8)
+                                }
                             }
                             
                             Spacer()
@@ -80,28 +93,30 @@ struct DetailsView: View {
                         VStack(alignment: .leading, spacing: 15) {
                             HStack(spacing: 0) {
                                 // MARK: Title of Content
-                                Text("Avengers: Infinity War")
+                                Text(content.title)
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .padding(.horizontal)
                                 
                                 // MARK: Restriction of Content
-                                Text("PG-13")
-                                    .font(.footnote)
-                                    .fontWeight(.medium)
-                                    .frame(height: 22)
-                                    .padding(.horizontal, 5)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(lineWidth: 1)
-                                    )
-                                    .foregroundColor(.primary.opacity(0.5))
+                                if content.contentRating != nil {
+                                    Text(content.contentRating!)
+                                        .font(.footnote)
+                                        .fontWeight(.medium)
+                                        .frame(height: 22)
+                                        .padding(.horizontal, 5)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .stroke(lineWidth: 1)
+                                        )
+                                        .foregroundColor(.primary.opacity(0.5))
+                                }
                             }
                             
                             // MARK: Genres of Content
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
-                                    ForEach(viewModel.genres, id: \.self) { genre in
+                                    ForEach(content.genre, id: \.self) { genre in
                                         Text(genre)
                                             .font(.caption)
                                             .fontWeight(.medium)
@@ -115,23 +130,13 @@ struct DetailsView: View {
                             }
                             
                             // MARK: Information About Content
-                            Text("After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos&apos; actions and restore balance to the universe.")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary.opacity(0.8))
-                                .padding(.horizontal)
+                            InfoText(content.description)
+                                
+                            let directors = content.director.map { $0.name }.joined(separator: ", ")
+                            InfoText("Director: \(directors)")
                             
-                            Text("**Director:** Anthony Russo, Joe Russo")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary.opacity(0.8))
-                                .padding(.horizontal)
-                            
-                            Text("**Actors:** Robert Downey Jr., Chris Evans, Mark Ruffalo")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary.opacity(0.8))
-                                .padding(.horizontal)
+                            let actors = content.actor.map { $0.name }.joined(separator: ", ")
+                            InfoText("Actors: \(actors)")
                                 .padding(.top, -8)
                         }
                         
@@ -170,17 +175,31 @@ struct DetailsView: View {
                     .onTapGesture { dismiss() }
             }
         }
-        .onAppear { tabBarPresenter.updatePresentState() }
-        .onDisappear { tabBarPresenter.updatePresentState() }
+        .onAppear {
+            viewModel.isFavorite = content.isFavorite
+            tabBarPresenter.updatePresentState()
+        }
+        .onDisappear {
+            //TODO: Call the closure to make content at given index favorited
+            favoriteStatusUpdate(index, viewModel.isFavorite)
+            tabBarPresenter.updatePresentState()
+        }
         .toolbar(.hidden)
+    }
+    
+    private func InfoText(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .fontWeight(.medium)
+            .foregroundColor(.primary.opacity(0.8))
+            .padding(.horizontal)
     }
 
 }
 
 struct DetailsView_Previews: PreviewProvider {
-        
     static var previews: some View {
-        DetailsView()
+        DetailsView(content: .example, index: 0, dismiss: {}, track: { _,_ in })
             .preferredColorScheme(.dark)
             .environmentObject(TabBarPresenter())
     }

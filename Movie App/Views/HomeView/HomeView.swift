@@ -12,7 +12,6 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
-        NavigationStack {
             ZStack {
                 Color.background
                     .ignoresSafeArea()
@@ -20,14 +19,13 @@ struct HomeView: View {
                 VStack(spacing: 15) {
                     // MARK: Content Type
                     HStack {
-                        TypeText("Movies", edge: .trailing, selection: 0)
+                        TypeText("Movies", edge: .trailing, selection: "Movies")
                         
-                        TypeText("Series", edge: .leading, selection: 1)
+                        TypeText("Series", edge: .leading, selection: "TVMovies")
                     }
                     
                     ScrollView(.vertical, showsIndicators: false)  {
                         VStack(spacing: 25) {
-                            
                             
                             //MARK: Carousel View
                             VStack(alignment: .leading) {
@@ -39,9 +37,12 @@ struct HomeView: View {
                                 
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 10) {
-                                        ForEach(viewModel.contents) { content in
-                                            PosterView(poster: content.poster, width: 170, height: 250, cornerRadius: 10)
-                                                .onTapGesture { viewModel.accessPosterView() }
+                                        ForEach(viewModel.contents.indices, id: \.self) { index in
+                                            // TODO: try to make the model Int based IDs using computed prop and see if that can replace indexing
+                                            if viewModel.contentInFilter(index, genreSpecific: false) {
+                                                PosterView(poster: viewModel.contents[index].poster, width: 170, height: 250, cornerRadius: 10)
+                                                    .onTapGesture { viewModel.accessPosterView(index) }
+                                            }
                                         }
                                     }
                                     .padding(.horizontal)
@@ -54,25 +55,29 @@ struct HomeView: View {
                                     .fontWeight(.bold)
                                     .padding(.leading)
                                 
-                                // MARK: Trending Movies Slider
+                                // MARK: Content Categories
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 10) {
-                                        ForEach(viewModel.categories, id: \.self) { category in
-                                            Toggle(isOn: viewModel.isCategorySelected(category)) {
-                                                Text(category)
+                                        ForEach(Array(viewModel.dynamicGenre), id: \.self) { genre in
+                                            Toggle(isOn: viewModel.isGenreSelected(genre)) {
+                                                Text(genre)
                                             }
-                                            .toggleStyle(CategoryToggleStyle())
+                                            .toggleStyle(GenreToggleStyle())
                                         }
                                     }
-                                    .padding(.leading)
+                                    .padding(.horizontal)
                                 }
                                 
-                                
+                                // MARK: Trending Movies Slider
                                 LazyVGrid(columns: viewModel.gridColumn, spacing: 15) {
-                                    ForEach(viewModel.contents) { content in
-                                        PosterView(poster: content.poster, width: 111, height: 164, cornerRadius: 10)
-                                            .onTapGesture { viewModel.accessPosterView() }
-//                                          
+                                    ForEach(viewModel.contents.indices, id: \.self) { index in
+                                        if viewModel.contentInFilter(index, genreSpecific: true) {
+                                            PosterView(poster: viewModel.contents[index].poster, width: 111, height: 164, cornerRadius: 10)
+                                                .onTapGesture { viewModel.accessPosterView(index) }
+                                                .onAppear {
+                                                    viewModel.requestMoreContentIfNeeded(index: index)
+                                            }
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 5)
@@ -83,23 +88,21 @@ struct HomeView: View {
                     }
                 }
                 
+                if viewModel.presentDetailsView {
+                    // TODO: are u sure its type safe?
+                    DetailsView(content: viewModel.selectedContent ?? .example,
+                                index: viewModel.selectedIndex ?? 0,
+                                dismiss: viewModel.dismissDetailView,
+                                track: viewModel.favoriteStatusUpdate)
+                    .zIndex(1)
+                    .transition(.offset(y: UIScreen.main.bounds.height))
+                }
+                
             }
-            .navigationDestination(isPresented: $viewModel.presentDetailsView) {
-                DetailsView()
-            }
-        }
-        .toolbar(.hidden, for: .bottomBar)
-        .onAppear {
-            Task {
-//                await viewModel.loadContentConcurrent()
-            }
-        }
-
-        
     }
     
     @ViewBuilder
-    private func TypeText(_ name: String, edge: Edge.Set, selection: Int) -> some
+    private func TypeText(_ name: String, edge: Edge.Set, selection: String) -> some
     View {
         Text(name)
             .font(.footnote)

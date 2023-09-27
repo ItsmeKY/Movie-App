@@ -45,7 +45,7 @@ struct SearchView: View {
             }
             .edgesIgnoringSafeArea(.bottom)
             .navigationDestination(isPresented: $viewModel.presentDetailsView) {
-                DetailsView()
+//                DetailsView()
             }
         }
     }

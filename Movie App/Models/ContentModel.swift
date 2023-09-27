@@ -26,6 +26,9 @@ struct ContentModel: Decodable, Identifiable {
     let actor: [Individual]
     let director: [Individual]
     
+    var poster: Image?
+    var isFavorite: Bool = false
+    
     enum CodingKeys: String, CodingKey {
         case url
         case title = "name"
@@ -40,11 +43,25 @@ struct ContentModel: Decodable, Identifiable {
         case director
     }
     
-    var poster: Image?
+    
+    // TODO: url generated are optional, however when data is decoded url expect non-optional, this leaves room for hidden crashes possibly, maybe make them type safe
+    static let example = ContentModel(url: URL(string: "https://www.imdb.com/title/tt4154796/")!,
+                                      title: "Avengers Endgame",
+                                      type: "Movie",
+                                      posterUrl: URL(string: "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg")!,
+                                      description: "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos&apos; actions and restore balance to the universe.",
+                                      aggregateRating: .init(ratingCount: 2_500_000, ratingValue: 8.2),
+                                      contentRating: "PG-13",
+                                      genre: ["Action", "Super-Hero", "Adventure", "Sci-fi"],
+                                      trailer: .init(url: URL(string: "https://www.imdb.com/video/vi2163260441/")!),
+                                      actor: [.init(name: "Robert Downey Jr."), .init(name: "Chris Evans"), .init(name: "Mark Ruffalo")],
+                                      director: [.init(name: "Anthony Russo"), .init(name: "Joe Russo")],
+                                      poster: Image("Avengers Poster"))
 }
 
 struct AggregateRating: Decodable {
     let ratingCount: Int
+    let ratingValue: Float
 }
 
 struct Trailer: Decodable {

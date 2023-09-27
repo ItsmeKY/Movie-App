@@ -11,21 +11,29 @@ final class HomeViewModel: ObservableObject {
     
     @Published var contents: [ContentModel] = []
     
-    @Published var selectedContentType: Int = 0
-    @Published var categorySelected: String = "All"
+    @Published var selectedContentType: String = "Movies"
+    @Published var selectedGenre: String = "All"
+    var selectedContent: ContentModel?
+    var selectedIndex: Int?
     @Published var presentDetailsView: Bool = false
     
+    // Variables for pagination
+    private var contentFromEndThreshold: Int = 5
+    private var contentRequestedPerCall: Int = 5
+    
+    private var totalContentsAvailable: Int { return contentsID.count }
+    private var contentLoadedCount: Int = 0
     
     let gridColumn: [GridItem] = [
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0)
     ]
-    let categories: [String] = ["All", "Action", "Thriller", "Romantic", "Adventure"]
-    private let contentsID: [String] = ["tt1517268",
-                                        "tt5971474", "tt10160976", "tt22687790", "tt10638522",
-//                                     "tt15398776", "tt9663764", "tt15354916", "tt15789038", "tt5537002",
-//                                     "tt17024450", "tt21276878", "tt14230458", "tt21454134", "tt15671028",
+    var dynamicGenre: Set<String> = Set(arrayLiteral: "All")
+    
+    private let contentsID: [String] = ["tt1517268", "tt5971474", "tt10160976", "tt22687790", "tt10638522",
+//                                        "tt15398776", "tt9663764", "tt15354916", "tt15789038", "tt5537002",
+//                                        "tt17024450", "tt21276878", "tt14230458", "tt21454134", "tt15671028",
 //                                     "tt5814060", "tt1462764", "tt8589698", "tt15153532", "tt21103300",
 //                                     "tt9362722", "tt0439572", "tt3291150", "tt17527468", "tt7599146",
 //                                     "tt11858890", "tt1001520", "tt10731256", "tt21940010", "tt13238346",
@@ -46,31 +54,84 @@ final class HomeViewModel: ObservableObject {
 ]
     private let jsonDecoder = JSONDecoder()
 
+
+    init() {
+        requestInitialContent()
+    }
     
-    
-    func isCategorySelected(_ category: String) -> Binding<Bool> {
+    func isGenreSelected(_ genre: String) -> Binding<Bool> {
         Binding<Bool> {
-            self.categorySelected == category
+            self.selectedGenre == genre
         } set: { isSelected in
-            if isSelected { self.categorySelected = category }
+            if isSelected { self.selectedGenre = genre }
         }
     }
     
     // TODO: param will take model info
-    func accessPosterView() {
+    func accessPosterView(_ index: Int) {
         withAnimation {
+            self.selectedIndex = index
+            self.selectedContent = contents[index]
             self.presentDetailsView = true
+        }
+    }
+    
+    func dismissDetailView() {
+        withAnimation {
+            self.presentDetailsView = false
+        }
+    }
+    
+    /// Checks if the content at the given index should be shown after user custom filtering
+    /// Filtering of Type (Movie or Series) and Genre (Action, Horror ...)
+    func contentInFilter(_ index: Int, genreSpecific: Bool) -> Bool {
+        let isSameType = contents[index].type == selectedContentType
+        if genreSpecific { return (selectedGenre == "All" || contents[index].genre.contains(selectedGenre)) && isSameType }
+        return isSameType
+    }
+    
+    func favoriteStatusUpdate(_ index: Int, isFavorite: Bool) {
+        guard contents[index].isFavorite != isFavorite else {
+            print("didnt updated favorite")
+            return
+            
+        }
+        contents[index].isFavorite = isFavorite
+        print(contents[index].isFavorite, "supposed to be updated")
+    }
+    
+    
+    func requestInitialContent() {
+        Task {
+            await loadContentConcurrent(start: contentLoadedCount, end: contentRequestedPerCall)
+        }
+    }
+    
+    func requestMoreContentIfNeeded(index: Int) {
+        // checks if the user has reached to a point so we fetch more data,
+        // and if the loaded data has not all be already loaded
+        guard contentLoadedCount - index == contentFromEndThreshold &&
+              contentLoadedCount < totalContentsAvailable else {
+            print("dont call: \(index), loaded content: \(contentLoadedCount), and loading needed? \(contentLoadedCount < totalContentsAvailable)")
+            return
+        }
+        
+        print("call for more content")
+        
+        // prevents safety checking indexing
+        let endIndex = min(contentLoadedCount + contentRequestedPerCall, totalContentsAvailable)
+        Task {
+            await loadContentConcurrent(start: contentLoadedCount, end: endIndex)
         }
     }
     
     
     /// Loads all the contents for all the existing content IDs cuncurrently
-    func loadContentConcurrent() async -> Void {
-        
+    func loadContentConcurrent(start startIndex: Int, end endIndex: Int) async {
         var all: [ContentModel] = []
         
         try? await withThrowingTaskGroup(of: ContentModel?.self) { group in
-            for contentID in contentsID {
+            for contentID in contentsID[startIndex..<endIndex] {
                 group.addTask {
                     // TODO: creates memory leak; work on this
                     return try? await self.parseContentJSON(contentID)
@@ -78,27 +139,34 @@ final class HomeViewModel: ObservableObject {
             }
             
             for try await contentFound in group {
-                if var safeContent = contentFound {
-//                    safeContent.poster = self.loadImage(safeContent.posterUrl)
+                if let safeContent = contentFound {
                     all.append(safeContent)
+                    
+                    for i in safeContent.genre {
+                        dynamicGenre.insert(i)
+                    }
                 }
             }
             return
         }
         
-        DispatchQueue.main.async { [all] in
-            self.contents = all
+        DispatchQueue.main.async { [weak self, all] in
+            self?.contents += all
+            self?.contentLoadedCount += all.count
         }
+        
     }
     
-    /// Loads Image from a given URL
-    private func loadImage(_ url: URL) -> Image? {
-        guard let data = try? Data(contentsOf: url),
+    /// Downloads data from URL and returns an Image utilized from the data
+    private func downloadImage(from url: URL) async -> Image? {
+        guard let (data, _) = try? await URLSession.shared.data(from: url),
               let uiImage = UIImage(data: data) else {
+            print("nil image")
             return nil
         }
         
         return Image(uiImage: uiImage)
+        
     }
     
     /// Fetches the end point based on the movieID, decodes json as the Content Model
@@ -115,7 +183,9 @@ final class HomeViewModel: ObservableObject {
         }
         
         do {
-            return try jsonDecoder.decode(Short.self, from: data).short
+            var content = try jsonDecoder.decode(Short.self, from: data).short
+//            content.poster = await downloadImage(from: content.posterUrl)
+            return content
         } catch {
             throw ParseError.invalidData
         }

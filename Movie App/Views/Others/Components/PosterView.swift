@@ -36,8 +36,8 @@ struct PosterView: View {
         self.cornerRadius = cornerRadius
     }
     
-    init(width: CGFloat, cornerRadius: CGFloat = 0) {
-        self.poster = nil
+    init(poster: Image? = nil, width: CGFloat, cornerRadius: CGFloat = 0) {
+        self.poster = poster
         self.width = width
         self.height = width * 1.47
         self.cornerRadius = cornerRadius

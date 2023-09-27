@@ -1,5 +1,5 @@
 //
-//  CategoryToggleStyle.swift
+//  GenreToggleStyle.swift
 //  Movie App
 //
 //  Created by ItsmeKY3 on 9/23/23.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CategoryToggleStyle: ToggleStyle {
+struct GenreToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.caption2)
@@ -29,18 +29,18 @@ struct CategoryToggleStyle: ToggleStyle {
 }
 
 
-struct CategoryToggleStyle_Previews: PreviewProvider {
+struct GenreToggleStyle_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 100) {
             Toggle(isOn: .constant(true)) {
                 Text("All")
             }
-            .toggleStyle(CategoryToggleStyle())
+            .toggleStyle(GenreToggleStyle())
             
             Toggle(isOn: .constant(false)) {
                 Text("Casual")
             }
-            .toggleStyle(CategoryToggleStyle())
+            .toggleStyle(GenreToggleStyle())
         }
         .padding()
         .background(.black)

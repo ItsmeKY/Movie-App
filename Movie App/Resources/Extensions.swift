@@ -29,3 +29,20 @@ extension View {
     }
     
 }
+
+
+extension Int {
+    
+    func letterFormat() -> String {
+        let number = abs(self)
+        
+        if number > 1_000_000 {
+            return String(format: "%.1fM", Double(number) / 1_000_000)
+        } else if number > 1_000 {
+            return String(format: "%.1fk", Double(number) / 1_000)
+        } else {
+            return String(number)
+        }
+    }
+    
+}

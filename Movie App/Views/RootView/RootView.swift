@@ -7,20 +7,12 @@
 
 import SwiftUI
 
-    final class TabBarPresenter: ObservableObject {
-        @Published var isPresent: Bool = true
-        
-        func updatePresentState() {
-            withAnimation {
-                isPresent.toggle()
-            }
-        }
-    }
+    
 
 struct RootView: View {
     
     @State var selectedTab: Int = 0
-    @StateObject var tabBarPresenter = TabBarPresenter()
+    @StateObject var tabBarPresenter = RootViewModel()
     
     init() {
         UITabBar.appearance().isHidden = true
@@ -55,7 +47,7 @@ struct RootView: View {
             .edgesIgnoringSafeArea(.bottom)
             .frame(height: 40)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .offset(y: tabBarPresenter.isPresent ? 0 : 100)
+            .offset(y: tabBarPresenter.presentTabBar ? 0 : 100)
         }
         .environmentObject(tabBarPresenter)
     }

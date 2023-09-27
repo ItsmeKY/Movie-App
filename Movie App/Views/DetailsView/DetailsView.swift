@@ -11,19 +11,12 @@ struct DetailsView: View {
     
     @StateObject private var viewModel = DetailsViewModel()
     // Learned: Environment Object cannot be nested in a class, only views (ie structs)
-    @EnvironmentObject var tabBarPresenter: TabBarPresenter
+    @EnvironmentObject var root: RootViewModel
 
     private var content: ContentModel
     private var index: Int
     private var dismiss: () -> Void
     private var favoriteStatusUpdate: (Int, Bool) -> Void
-    
-    init(content: ContentModel, index: Int, dismiss: @escaping () -> Void, track: @escaping (Int, Bool) -> Void) {
-        self.content = content
-        self.index = index
-        self.dismiss = dismiss
-        self.favoriteStatusUpdate = track
-    }
     
     var body: some View {
         GeometryReader { geometryProxy in
@@ -177,12 +170,12 @@ struct DetailsView: View {
         }
         .onAppear {
             viewModel.isFavorite = content.isFavorite
-            tabBarPresenter.updatePresentState()
+            root.updateTabBarState()
         }
         .onDisappear {
             //TODO: Call the closure to make content at given index favorited
             favoriteStatusUpdate(index, viewModel.isFavorite)
-            tabBarPresenter.updatePresentState()
+            root.updateTabBarState()
         }
         .toolbar(.hidden)
     }
@@ -194,6 +187,13 @@ struct DetailsView: View {
             .foregroundColor(.primary.opacity(0.8))
             .padding(.horizontal)
     }
+    
+    init(content: ContentModel, index: Int, dismiss: @escaping () -> Void, track: @escaping (Int, Bool) -> Void) {
+        self.content = content
+        self.index = index
+        self.dismiss = dismiss
+        self.favoriteStatusUpdate = track
+    }
 
 }
 
@@ -201,6 +201,6 @@ struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
         DetailsView(content: .example, index: 0, dismiss: {}, track: { _,_ in })
             .preferredColorScheme(.dark)
-            .environmentObject(TabBarPresenter())
+            .environmentObject(RootViewModel())
     }
 }

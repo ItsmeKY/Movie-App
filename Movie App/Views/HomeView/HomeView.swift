@@ -19,9 +19,11 @@ struct HomeView: View {
                 VStack(spacing: 15) {
                     // MARK: Content Type
                     HStack {
-                        TypeText("Movies", edge: .trailing, selection: "Movies")
+                        TypeText("Movies", type: .movie)
                         
-                        TypeText("Series", edge: .leading, selection: "TVMovies")
+                        Spacer().frame(width: 40)
+                        
+                        TypeText("Series", type: .series)
                     }
                     
                     ScrollView(.vertical, showsIndicators: false)  {
@@ -102,16 +104,15 @@ struct HomeView: View {
     }
     
     @ViewBuilder
-    private func TypeText(_ name: String, edge: Edge.Set, selection: String) -> some
+    private func TypeText(_ name: String, type: ContentType) -> some
     View {
         Text(name)
             .font(.footnote)
             .fontWeight(.medium)
-            .padding(edge)
-            .foregroundColor(viewModel.selectedContentType == selection ? .primary : .secondary)
+            .foregroundColor(viewModel.selectedContentType == type ? .primary : .secondary)
             .onTapGesture {
                 // TODO: with animation
-                viewModel.selectedContentType = selection
+                viewModel.selectedContentType = type
             }
     }
 }

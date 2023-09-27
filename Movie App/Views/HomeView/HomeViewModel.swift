@@ -9,21 +9,27 @@ import SwiftUI
 
 final class HomeViewModel: ObservableObject {
     
+    // Stay
     @Published var contents: [ContentModel] = []
     
+    // Stay
     @Published var selectedContentType: String = "Movies"
     @Published var selectedGenre: String = "All"
+    
+    // Move to Root
+    // Remove selectedIndex
     var selectedContent: ContentModel?
     var selectedIndex: Int?
     @Published var presentDetailsView: Bool = false
     
+    // Stay
     // Variables for pagination
     private var contentFromEndThreshold: Int = 5
     private var contentRequestedPerCall: Int = 5
-    
     private var totalContentsAvailable: Int { return contentsID.count }
     private var contentLoadedCount: Int = 0
     
+    // Stay
     let gridColumn: [GridItem] = [
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
@@ -31,6 +37,7 @@ final class HomeViewModel: ObservableObject {
     ]
     var dynamicGenre: Set<String> = Set(arrayLiteral: "All")
     
+    // Move to Singleton
     private let contentsID: [String] = ["tt1517268", "tt5971474", "tt10160976", "tt22687790", "tt10638522",
 //                                        "tt15398776", "tt9663764", "tt15354916", "tt15789038", "tt5537002",
 //                                        "tt17024450", "tt21276878", "tt14230458", "tt21454134", "tt15671028",
@@ -59,6 +66,7 @@ final class HomeViewModel: ObservableObject {
         requestInitialContent()
     }
     
+    // Stay
     func isGenreSelected(_ genre: String) -> Binding<Bool> {
         Binding<Bool> {
             self.selectedGenre == genre
@@ -67,8 +75,11 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    // TODO: param will take model info
-    func accessPosterView(_ index: Int) {
+    // Move to Root
+    // Remove Index, just pass type ContentModel
+    // Compare to the [favorite content] if in it, send that, else the non fav form
+    // Asign it and switch the bool
+    func accessDetailsView(_ index: Int) {
         withAnimation {
             self.selectedIndex = index
             self.selectedContent = contents[index]
@@ -76,12 +87,16 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    func dismissDetailView() {
+    // Move to Root
+    // See if favorite state is changed
+    // Accordingly change [favorite content]
+    func dismissDetailsView() {
         withAnimation {
             self.presentDetailsView = false
         }
     }
     
+    // Stay
     /// Checks if the content at the given index should be shown after user custom filtering
     /// Filtering of Type (Movie or Series) and Genre (Action, Horror ...)
     func contentInFilter(_ index: Int, genreSpecific: Bool) -> Bool {
@@ -90,6 +105,7 @@ final class HomeViewModel: ObservableObject {
         return isSameType
     }
     
+    // Remove
     func favoriteStatusUpdate(_ index: Int, isFavorite: Bool) {
         guard contents[index].isFavorite != isFavorite else {
             print("didnt updated favorite")
@@ -99,20 +115,23 @@ final class HomeViewModel: ObservableObject {
         contents[index].isFavorite = isFavorite
         print(contents[index].isFavorite, "supposed to be updated")
     }
-    
-    
+
+    // Stay
     func requestInitialContent() {
         Task {
             await loadContentConcurrent(start: contentLoadedCount, end: contentRequestedPerCall)
         }
     }
     
+    // Stay
+    // Assign [ContentModel] recieved from Singleton
+    // The genre set should be unioned with the existing set above
     func requestMoreContentIfNeeded(index: Int) {
         // checks if the user has reached to a point so we fetch more data,
         // and if the loaded data has not all be already loaded
         guard contentLoadedCount - index == contentFromEndThreshold &&
               contentLoadedCount < totalContentsAvailable else {
-            print("dont call: \(index), loaded content: \(contentLoadedCount), and loading needed? \(contentLoadedCount < totalContentsAvailable)")
+            print("dont call: \(index), loaded: \(contentLoadedCount)")
             return
         }
         
@@ -124,8 +143,11 @@ final class HomeViewModel: ObservableObject {
             await loadContentConcurrent(start: contentLoadedCount, end: endIndex)
         }
     }
-    
-    
+
+    // Move to Singleton
+    // Make it return [ContentModel] and [Set of genre]
+    // (do on commit 2) Remove pagination of content info
+    // You may keep it for loading images however
     /// Loads all the contents for all the existing content IDs cuncurrently
     func loadContentConcurrent(start startIndex: Int, end endIndex: Int) async {
         var all: [ContentModel] = []
@@ -157,18 +179,8 @@ final class HomeViewModel: ObservableObject {
         
     }
     
-    /// Downloads data from URL and returns an Image utilized from the data
-    private func downloadImage(from url: URL) async -> Image? {
-        guard let (data, _) = try? await URLSession.shared.data(from: url),
-              let uiImage = UIImage(data: data) else {
-            print("nil image")
-            return nil
-        }
-        
-        return Image(uiImage: uiImage)
-        
-    }
-    
+    // Move to Singleton
+    // Make another version that takes (name:) -> [ContentModel]
     /// Fetches the end point based on the movieID, decodes json as the Content Model
     private func parseContentJSON(_ contentID: String) async throws -> ContentModel {
         
@@ -183,23 +195,34 @@ final class HomeViewModel: ObservableObject {
         }
         
         do {
-            var content = try jsonDecoder.decode(Short.self, from: data).short
+            let content = try jsonDecoder.decode(Short.self, from: data).short
 //            content.poster = await downloadImage(from: content.posterUrl)
             return content
         } catch {
             throw ParseError.invalidData
         }
     }
-}
-
-extension HomeViewModel {
-    enum ParseError: Error {
+    
+    // Move to Singleton
+    /// Downloads data from URL and returns an Image utilized from the data
+    private func downloadImage(from url: URL) async -> Image? {
+        guard let (data, _) = try? await URLSession.shared.data(from: url),
+              let uiImage = UIImage(data: data) else {
+            print("nil image")
+            return nil
+        }
+        return Image(uiImage: uiImage)
+        
+    }
+    
+    // Move to Singleton
+    private enum ParseError: Error {
         case invalidURL
         case invalidResponse
         case invalidData
     }
+    
 }
-
 
 
 

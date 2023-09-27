@@ -11,12 +11,9 @@ struct DetailsView: View {
     
     @StateObject private var viewModel = DetailsViewModel()
     // Learned: Environment Object cannot be nested in a class, only views (ie structs)
-    @EnvironmentObject var root: RootViewModel
+    @EnvironmentObject private var root: RootViewModel
 
-    private var content: ContentModel
-    private var index: Int
-    private var dismiss: () -> Void
-    private var favoriteStatusUpdate: (Int, Bool) -> Void
+//    private var content: ContentModel
     
     var body: some View {
         GeometryReader { geometryProxy in
@@ -28,8 +25,7 @@ struct DetailsView: View {
                     VStack(spacing: 20) {
                         //MARK: Poster
 
-//                        PosterView(poster: content.poster)
-                        PosterView(poster: content.poster)
+                        PosterView(poster: root.selectedContent.poster)
                             .padding(.top, -97)
 
                         
@@ -53,7 +49,7 @@ struct DetailsView: View {
                             
                             //MARK: Ranking and Views
                             HStack(spacing: 5) {
-                                if let rating = content.aggregateRating {
+                                if let rating = root.selectedContent.aggregateRating {
                                     Image(systemName: "star.fill")
                                         .font(.subheadline)
                                         .foregroundColor(.alertYellow)
@@ -86,14 +82,14 @@ struct DetailsView: View {
                         VStack(alignment: .leading, spacing: 15) {
                             HStack(spacing: 0) {
                                 // MARK: Title of Content
-                                Text(content.title)
+                                Text(root.selectedContent.title)
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .padding(.horizontal)
                                 
                                 // MARK: Restriction of Content
-                                if content.contentRating != nil {
-                                    Text(content.contentRating!)
+                                if let restriction = root.selectedContent.contentRating {
+                                    Text(restriction)
                                         .font(.footnote)
                                         .fontWeight(.medium)
                                         .frame(height: 22)
@@ -109,7 +105,7 @@ struct DetailsView: View {
                             // MARK: Genres of Content
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
-                                    ForEach(content.genre, id: \.self) { genre in
+                                    ForEach(root.selectedContent.genre, id: \.self) { genre in
                                         Text(genre)
                                             .font(.caption)
                                             .fontWeight(.medium)
@@ -123,12 +119,12 @@ struct DetailsView: View {
                             }
                             
                             // MARK: Information About Content
-                            InfoText(content.description)
+                            InfoText(root.selectedContent.description)
                                 
-                            let directors = content.director.map { $0.name }.joined(separator: ", ")
+                            let directors = root.selectedContent.director.map { $0.name }.joined(separator: ", ")
                             InfoText("Director: \(directors)")
                             
-                            let actors = content.actor.map { $0.name }.joined(separator: ", ")
+                            let actors = root.selectedContent.actor.map { $0.name }.joined(separator: ", ")
                             InfoText("Actors: \(actors)")
                                 .padding(.top, -8)
                         }
@@ -165,18 +161,13 @@ struct DetailsView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.leading)
-                    .onTapGesture { dismiss() }
+                    .onTapGesture { root.dismissDetailsView() }
             }
         }
         .onAppear {
-            viewModel.isFavorite = content.isFavorite
-            root.updateTabBarState()
+            viewModel.isFavorite = root.selectedContent.isFavorite
         }
-        .onDisappear {
-            //TODO: Call the closure to make content at given index favorited
-            favoriteStatusUpdate(index, viewModel.isFavorite)
-            root.updateTabBarState()
-        }
+  
         .toolbar(.hidden)
     }
     
@@ -187,19 +178,12 @@ struct DetailsView: View {
             .foregroundColor(.primary.opacity(0.8))
             .padding(.horizontal)
     }
-    
-    init(content: ContentModel, index: Int, dismiss: @escaping () -> Void, track: @escaping (Int, Bool) -> Void) {
-        self.content = content
-        self.index = index
-        self.dismiss = dismiss
-        self.favoriteStatusUpdate = track
-    }
 
 }
 
 struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailsView(content: .example, index: 0, dismiss: {}, track: { _,_ in })
+        DetailsView()
             .preferredColorScheme(.dark)
             .environmentObject(RootViewModel())
     }

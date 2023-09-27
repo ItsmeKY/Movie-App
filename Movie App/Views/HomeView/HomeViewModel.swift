@@ -14,27 +14,21 @@ enum ContentType: String {
 
 final class HomeViewModel: ObservableObject {
     
-    // Stay
+    // -- Stay
     @Published var contents: [ContentModel] = []
     
-    // Stay
+    // -- Stay
     @Published var selectedContentType: ContentType = .movie
     @Published var selectedGenre: String = "All"
-    
-    // Move to Root
-    // Remove selectedIndex
-    var selectedContent: ContentModel?
-    var selectedIndex: Int?
-    @Published var presentDetailsView: Bool = false
-    
-    // Stay
+
+    // -- Stay
     // Variables for pagination
     private var contentFromEndThreshold: Int = 5
     private var contentRequestedPerCall: Int = 5
     private var totalContentsAvailable: Int { return NetworkManager.shared.contentsID.count }
     private var contentLoadedCount: Int = 0
     
-    // Stay
+    // -- Stay
     let gridColumn: [GridItem] = [
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
@@ -46,7 +40,7 @@ final class HomeViewModel: ObservableObject {
         requestInitialContent()
     }
     
-    // Stay
+    // -- Stay
     func isGenreSelected(_ genre: String) -> Binding<Bool> {
         Binding<Bool> {
             self.selectedGenre == genre
@@ -55,28 +49,9 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    // Move to Root
-    // Remove Index, just pass type ContentModel
-    // Compare to the [favorite content] if in it, send that, else the non fav form
-    // Asign it and switch the bool
-    func accessDetailsView(_ index: Int) {
-        withAnimation {
-            self.selectedIndex = index
-            self.selectedContent = contents[index]
-            self.presentDetailsView = true
-        }
-    }
+
     
-    // Move to Root
-    // See if favorite state is changed
-    // Accordingly change [favorite content]
-    func dismissDetailsView() {
-        withAnimation {
-            self.presentDetailsView = false
-        }
-    }
-    
-    // Stay
+    // -- Stay
     /// Checks if the content at the given index should be shown after user custom filtering
     /// Filtering of Type (Movie or Series) and Genre (Action, Horror ...)
     func contentInFilter(_ index: Int, genreSpecific: Bool) -> Bool {
@@ -85,18 +60,7 @@ final class HomeViewModel: ObservableObject {
         return isSameType
     }
     
-    // Remove
-    func favoriteStatusUpdate(_ index: Int, isFavorite: Bool) {
-        guard contents[index].isFavorite != isFavorite else {
-            print("didnt updated favorite")
-            return
-            
-        }
-        contents[index].isFavorite = isFavorite
-        print(contents[index].isFavorite, "supposed to be updated")
-    }
-
-    // Stay
+    // -- Stay
     func requestInitialContent() {
         Task {
             let (contents, genre) = await NetworkManager.shared.loadContentConcurrent(start: contentLoadedCount, end: contentRequestedPerCall)
@@ -109,9 +73,10 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    // Stay
-    // Assign [ContentModel] recieved from Singleton (using dispatch)
+    // -- Stay
+    // -- Assign [ContentModel] recieved from Singleton (using dispatch)
     // The genre set should be unioned with the existing set above
+    // OR if pagination is removed, just turn into a sorted array and assign it
     func requestMoreContentIfNeeded(index: Int) {
         // checks if the user has reached to a point so we fetch more data,
         // and if the loaded data has not all be already loaded

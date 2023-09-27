@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     
     @StateObject private var viewModel = HomeViewModel()
+    @EnvironmentObject private var root: RootViewModel
+    
     
     var body: some View {
             ZStack {
@@ -43,7 +45,7 @@ struct HomeView: View {
                                             // TODO: try to make the model Int based IDs using computed prop and see if that can replace indexing
                                             if viewModel.contentInFilter(index, genreSpecific: false) {
                                                 PosterView(poster: viewModel.contents[index].poster, width: 170, height: 250, cornerRadius: 10)
-                                                    .onTapGesture { viewModel.accessDetailsView(index) }
+                                                    .onTapGesture { root.accessDetailsView(viewModel.contents[index]) }
                                             }
                                         }
                                     }
@@ -75,7 +77,7 @@ struct HomeView: View {
                                     ForEach(viewModel.contents.indices, id: \.self) { index in
                                         if viewModel.contentInFilter(index, genreSpecific: true) {
                                             PosterView(poster: viewModel.contents[index].poster, width: 111, height: 164, cornerRadius: 10)
-                                                .onTapGesture { viewModel.accessDetailsView(index) }
+                                                .onTapGesture { root.accessDetailsView(viewModel.contents[index]) }
                                                 .onAppear {
                                                     viewModel.requestMoreContentIfNeeded(index: index)
                                             }
@@ -90,14 +92,11 @@ struct HomeView: View {
                     }
                 }
                 
-                if viewModel.presentDetailsView {
+                if root.presentDetailsView {
                     // TODO: are u sure its type safe?
-                    DetailsView(content: viewModel.selectedContent ?? .example,
-                                index: viewModel.selectedIndex ?? 0,
-                                dismiss: viewModel.dismissDetailsView,
-                                track: viewModel.favoriteStatusUpdate)
-                    .zIndex(1)
-                    .transition(.offset(y: UIScreen.main.bounds.height))
+                    DetailsView()
+                        .zIndex(1)
+                        .transition(.offset(y: UIScreen.main.bounds.height))
                 }
                 
             }

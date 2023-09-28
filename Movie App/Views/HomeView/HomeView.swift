@@ -42,7 +42,6 @@ struct HomeView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
                                     ForEach(viewModel.contents, id: \.id) { content in
-                                        // TODO: try to make the model Int based IDs using computed prop and see if that can replace indexing
                                         if viewModel.contentInFilter(content.id, genreSpecific: false) {
                                             PosterView(poster: content.poster, width: 170, height: 250, cornerRadius: 10)
                                                 .onTapGesture { root.accessDetailsView(content) }
@@ -89,13 +88,7 @@ struct HomeView: View {
                     }
                 }
             }
-            
-            if root.presentDetailsView {
-                // TODO: are u sure its type safe?
-                DetailsView()
-                    .zIndex(1)
-                    .transition(.offset(y: UIScreen.main.bounds.height))
-            }
+
             
         }
     }

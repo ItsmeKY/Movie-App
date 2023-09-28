@@ -9,11 +9,14 @@ import SwiftUI
 
 struct DetailsView: View {
     
-    @StateObject private var viewModel = DetailsViewModel()
     // Learned: Environment Object cannot be nested in a class, only views (ie structs)
     @EnvironmentObject private var root: RootViewModel
-
+    @State private var isFavorite: Bool = false
 //    private var content: ContentModel
+    
+//    init() {
+//        isFavorite = root.selectedContent.isFavorite
+//    }
     
     var body: some View {
         GeometryReader { geometryProxy in
@@ -71,11 +74,11 @@ struct DetailsView: View {
                                 .resizable()
                                 .frame(width: 21, height: 18, alignment: .center)
                             
-                            Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
+                            Image(systemName: isFavorite ? "heart.fill" : "heart")
                                 .resizable()
                                 .frame(width: 18, height: 17, alignment: .center)
-                                .foregroundColor(viewModel.isFavorite ? .heartRed : .secondary)
-                                .onTapGesture { viewModel.isFavorite.toggle() }
+                                .foregroundColor(isFavorite ? .heartRed : .secondary)
+                                .onTapGesture { isFavorite.toggle() }
                         }
                         .padding(.horizontal)
                         
@@ -161,13 +164,13 @@ struct DetailsView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.leading)
-                    .onTapGesture { root.dismissDetailsView() }
+                    .onTapGesture { root.dismissDetailsView(isChanged: isFavorite != root.selectedContent.isFavorite,
+                                                            isFavorite: isFavorite) }
             }
         }
         .onAppear {
-            viewModel.isFavorite = root.selectedContent.isFavorite
+            isFavorite = root.selectedContent.isFavorite
         }
-  
         .toolbar(.hidden)
     }
     

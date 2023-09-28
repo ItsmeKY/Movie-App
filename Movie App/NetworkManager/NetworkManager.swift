@@ -56,7 +56,7 @@ final class NetworkManager {
             
             for try await contentFound in group {
                 if var safeContent = contentFound {
-                    // Setting Ids (so i dont use UUID and stop indexing)
+                    // Setting Ids (so i dont use UUID and stop indexing) and imdb ID
                     safeContent.id = idTracker
                     idTracker += 1
                     
@@ -96,8 +96,9 @@ final class NetworkManager {
         }
         
         do {
-            let content = try jsonDecoder.decode(Short.self, from: data).short
+            var content = try jsonDecoder.decode(Short.self, from: data).short
 //            content.poster = await downloadImage(from: content.posterUrl)
+            content.imdbID = contentID
             return content
         } catch {
             throw ParseError.invalidData

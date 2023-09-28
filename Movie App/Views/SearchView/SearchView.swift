@@ -10,9 +10,13 @@ import SwiftUI
 struct SearchView: View {
     
     @StateObject private var viewModel = SearchViewModel()
+    @EnvironmentObject private var root: RootViewModel
+    private var gridColumn: [GridItem] = [
+        GridItem(.flexible(minimum: 125, maximum: 180), spacing: 20),
+        GridItem(.flexible(minimum: 125, maximum: 180), spacing: 20)
+    ]
     
     var body: some View {
-        NavigationStack {
             ZStack {
                 Color.background
                     .ignoresSafeArea()
@@ -40,14 +44,14 @@ struct SearchView: View {
                     .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
                     
                     
-                    PosterScrollView(accessPosterView: viewModel.accessPosterView)
+                    // MARK: Posters ScrollView
+                    
+                    Spacer()
                 }
+                
             }
             .edgesIgnoringSafeArea(.bottom)
-            .navigationDestination(isPresented: $viewModel.presentDetailsView) {
-//                DetailsView()
-            }
-        }
+        
     }
 }
 
@@ -55,5 +59,6 @@ struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
             .preferredColorScheme(.dark)
+            .environmentObject(RootViewModel())
     }
 }

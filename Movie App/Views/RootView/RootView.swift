@@ -11,8 +11,7 @@ import SwiftUI
 
 struct RootView: View {
     
-    @State var selectedTab: Int = 0
-    @StateObject var tabBarPresenter = RootViewModel()
+    @StateObject var root = RootViewModel()
     
     init() {
         UITabBar.appearance().isHidden = true
@@ -20,14 +19,14 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-            TabView(selection: $selectedTab) {
+            TabView(selection: $root.selectedTab) {
                 HomeView()
                     .tag(0)
                 
                 SearchView()
                     .tag(1)
                 
-                EmptyView()
+                FavoritesView()
                     .tag(2)
             }
 
@@ -48,15 +47,22 @@ struct RootView: View {
             }
             .frame(height: 40)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .offset(y: tabBarPresenter.presentTabBar ? 0 : 100)
+            .offset(y: root.presentTabBar ? 0 : 100)
+            
+            
+            if root.presentDetailsView {
+                DetailsView()
+                    .zIndex(1)
+                    .transition(.offset(y: UIScreen.main.bounds.height))
+            }
         }
-        .environmentObject(tabBarPresenter)
+        .environmentObject(root)
     }
 }
 
 extension RootView {
     private func TabItem(_ systemName: String, tag: Int) -> some View {
-        let isActive = selectedTab == tag
+        let isActive = self.root.selectedTab == tag
         
         return RoundedRectangle(cornerRadius: 8)
             .fill(isActive ? Color.focus : .clear)
@@ -67,7 +73,7 @@ extension RootView {
                     .opacity(isActive ? 1 : 0.5)
             }
             .onTapGesture {
-                self.selectedTab = tag
+                self.root.selectedTab = tag
             }
     }
 }

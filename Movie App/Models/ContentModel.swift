@@ -25,7 +25,8 @@ struct ContentModel: Decodable {
     let director: [Individual]
     
     var id: Int = -1
-    var poster: Image?
+    var imdbID: String = ""
+    var poster: Image? = nil
     var isFavorite: Bool = false
     
     enum CodingKeys: String, CodingKey {

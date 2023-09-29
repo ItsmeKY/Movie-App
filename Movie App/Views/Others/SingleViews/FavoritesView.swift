@@ -29,7 +29,7 @@ struct FavoritesView: View {
                     LazyVGrid(columns: gridColumn, spacing: 20) {
                         ForEach(root.favoriteContents.indices, id: \.self) { index in
                             PosterView(poster: root.favoriteContents[index].poster,
-                                       width: 170, height: 217, cornerRadius: 10)
+                                       width: 167, height: 245, cornerRadius: 10)
                                 .onTapGesture { root.accessDetailsView(for: index) }
                         }
                     }

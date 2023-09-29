@@ -28,10 +28,10 @@ struct SearchView: View {
                             .font(.title2)
                             .foregroundColor(.gray)
                         
-                        TextField("Search Movies or Series", text: $viewModel.searchContent)
+                        TextField("Search Movies or Series", text: $viewModel.searchedKeyword)
                             .foregroundColor(.primary)
                             .font(.subheadline)
-                            .onSubmit {}
+                            .onSubmit { viewModel.loadContent() }
                             .submitLabel(.search)
                         
                     }
@@ -45,6 +45,16 @@ struct SearchView: View {
                     
                     
                     // MARK: Posters ScrollView
+                    ScrollView(.vertical, showsIndicators: false) {
+                        LazyVGrid(columns: gridColumn, spacing: 20) {
+                            ForEach(viewModel.searchContent, id: \.id) { content in
+                                PosterView(poster: content.poster,
+                                           width: 167, height: 245, cornerRadius: 10)
+                                    .onTapGesture { root.accessDetailsView(content) }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                     
                     Spacer()
                 }

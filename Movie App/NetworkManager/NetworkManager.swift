@@ -41,16 +41,16 @@ final class NetworkManager {
     // -- (do on commit 2) Remove pagination of content info
     // You may keep it for loading images however
     /// Loads all the contents for all the existing content IDs cuncurrently, and also returns a list of unique genres found in the contents
-    func loadContentConcurrent() async -> ([ContentModel], [String]) {
+    func loadContentConcurrent(_ contentIDs: [String], withGenre: Bool) async -> ([ContentModel], [String]) {
         var all: [ContentModel] = []
         var genres: Set<String> = Set()
         var idTracker: Int = 0
         
         try? await withThrowingTaskGroup(of: ContentModel?.self) { group in
-            for contentID in contentsID {
+            for contentID in contentIDs {
                 group.addTask {
                     // TODO: creates memory leak; work on this
-                    return try? await self.parseContentJSON(contentID)
+                    return try? await self.parseContentJSON(contentID: contentID)
                 }
             }
             
@@ -62,9 +62,11 @@ final class NetworkManager {
                     
                     all.append(safeContent)
                     
-                    // Finding Unique Genres
-                    for i in safeContent.genre {
-                        genres.insert(i)
+                    if withGenre {
+                        // Finding Unique Genres
+                        for i in safeContent.genre {
+                            genres.insert(i)
+                        }
                     }
                     
                     print("data appended: \(all.count)")
@@ -83,7 +85,7 @@ final class NetworkManager {
     // -- Move to Singleton
     // Make another version that takes (name:) -> [ContentModel]
     /// Fetches the end point based on the movieID, decodes json as the Content Model
-    private func parseContentJSON(_ contentID: String) async throws -> ContentModel {
+    private func parseContentJSON(contentID: String) async throws -> ContentModel {
         
         guard let url = URL(string: "https://search.imdbot.workers.dev/?tt=\(contentID)") else {
             throw ParseError.invalidURL
@@ -103,6 +105,32 @@ final class NetworkManager {
         } catch {
             throw ParseError.invalidData
         }
+    }
+    
+    // This parse method works slightly differently than the other one, this calls a search api the calls loadDataConcurrrent
+    func parseContentJSON(keyword: String) async throws -> [ContentModel] {
+        print("in parse function pre url")
+        guard let url = URL(string: "https://search.imdbot.workers.dev/?q=\(keyword)") else {
+            throw ParseError.invalidURL
+        }
+        
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw ParseError.invalidResponse
+        }
+            
+        print("in parse function pre data")
+        do {
+            let searchResult = try jsonDecoder.decode(SearchModel.self, from: data)
+            let contentIDs = searchResult.contentIDs.map { $0.imdbID }
+            let (contents, _) = await self.loadContentConcurrent(contentIDs, withGenre: false)
+            print(contents.count)
+            return contents
+        } catch {
+            throw ParseError.invalidData
+        }
+        
     }
     
     // -- Move to Singleton

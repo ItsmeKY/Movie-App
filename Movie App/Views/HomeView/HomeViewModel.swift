@@ -31,7 +31,7 @@ final class HomeViewModel: ObservableObject {
     
     func loadContent() {
         Task {
-            let (contents, genres) = await NetworkManager.shared.loadContentConcurrent()
+            let (contents, genres) = await NetworkManager.shared.loadContentConcurrent(NetworkManager.shared.contentsID, withGenre: true)
             
             DispatchQueue.main.async {
                 self.contents = contents

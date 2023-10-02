@@ -135,8 +135,9 @@ struct DetailsView: View {
                             // MARK: Information About Content
                             InfoText(root.selectedContent.description)
                                 
-                            let directors = root.selectedContent.director.map { $0.name }.joined(separator: ", ")
-                            InfoText("Director: \(directors)")
+                            if let directors = root.selectedContent.director?.map({ $0.name }).joined(separator: ", ") {
+                                InfoText("Director: \(directors)")
+                            }
                             
                             let actors = root.selectedContent.actor.map { $0.name }.joined(separator: ", ")
                             InfoText("Actors: \(actors)")

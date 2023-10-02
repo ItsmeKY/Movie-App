@@ -13,7 +13,9 @@ final class NetworkManager {
     private init() {}
     
     // Move to Singleton
-    let contentsID: [String] = ["tt1517268", "tt5971474", "tt10160976", "tt22687790", "tt10638522",
+    let contentsID: [String] = [
+        "tt1517268", "tt5971474", "tt10160976", 
+//        "tt22687790", "tt10638522",
 //                                        "tt15398776", "tt9663764", "tt15354916", "tt15789038", "tt5537002",
 //                                        "tt17024450", "tt21276878", "tt14230458", "tt21454134", "tt15671028",
 //                                     "tt5814060", "tt1462764", "tt8589698", "tt15153532", "tt21103300",
@@ -33,6 +35,13 @@ final class NetworkManager {
 //                                     "tt5090568", "tt1160419", "tt6587046", "tt1375666", "tt7405458",
 //                                     "tt16968450", "tt6710474", "tt15257160", "tt0361748", "tt7645334",
 //                                     "tt9639470", "tt13833688", "tt14362112", "tt1457767", "tt0082971"
+// series
+                                "tt0944947", "tt0903747", "tt4574334", 
+//        "tt0108778", "tt1475582", "tt7366338",
+//                                "tt0773262", "tt0386676", "tt2085059", "tt2356777", "tt2442560", "tt3032476",
+//                                "tt1190634", "tt2861424", "tt8111088", "tt0475784", "tt1856010", "tt10048342",
+//                                "tt0185906", "tt0412142", "tt3322312", "tt3581920", "tt2707408", "tt2560140",
+//                                "tt0141842", "tt0096697", "tt5753856"
 ]
     private let jsonDecoder = JSONDecoder()
     
@@ -85,6 +94,7 @@ final class NetworkManager {
         
         var sortedSeriesGenres = Array(seriesGenres).sorted()
         sortedSeriesGenres.insert("All", at: 0)
+        print(sortedSeriesGenres.count)
         
         return (all, sortedMovieGenres, sortedSeriesGenres)
     }
@@ -108,6 +118,7 @@ final class NetworkManager {
             var content = try jsonDecoder.decode(Short.self, from: data).short
 //            content.poster = await downloadImage(from: content.posterUrl)
             content.imdbID = contentID
+            print(content.type)
             return content
         } catch {
             throw ParseError.invalidData

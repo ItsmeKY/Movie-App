@@ -18,22 +18,19 @@ struct RootView: View {
     
     var body: some View {
         ZStack {
-            TabView(selection: $root.selectedTab) {
-                HomeView()
-                    .tag(0)
-                
-                SearchView()
-                    .tag(1)
-                
-                FavoritesView()
-                    .tag(2)
-            }
+            VStack {
+                TabView(selection: $root.selectedTab) {
+                    HomeView()
+                        .tag(0)
+                    
+                    SearchView()
+                        .tag(1)
+                    
+                    FavoritesView()
+                        .tag(2)
+                }
 
-            ZStack {
-                Color.tabBar
-                    .edgesIgnoringSafeArea(.bottom)
-                    .padding(.top, -15)
- 
+
                 HStack {
                     Spacer()
                     TabItem("house", tag: 0)
@@ -43,10 +40,10 @@ struct RootView: View {
                     TabItem("heart", tag: 2)
                     Spacer()
                 }
+                .frame(height: 40)
+                .background(Color.tabBar.ignoresSafeArea().padding(.top, -15))
+                .offset(y: root.presentTabBar ? 0 : 100)
             }
-            .frame(height: 40)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .offset(y: root.presentTabBar ? 0 : 100)
             
             
             if root.presentDetailsView {

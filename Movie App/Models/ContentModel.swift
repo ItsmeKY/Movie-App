@@ -22,10 +22,11 @@ struct ContentModel: Decodable {
     let genre: [String]
     let trailer: Trailer?
     let actor: [Individual]
-    let director: [Individual]
+    let director: [Individual]?
     
     var id: Int = -1
     var imdbID: String = ""
+    // TODO: can possibly remove this
     var poster: Image? = nil
     var isFavorite: Bool = false
     

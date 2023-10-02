@@ -27,6 +27,17 @@ struct PosterView: View {
                 .frame(width: width, height: height, alignment: .center)
                 .cornerRadius(cornerRadius)
         }
+//        let url = URL(string: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_.jpg")
+//        AsyncImage(url: url) { Image in
+//            Image
+//                .resizable()
+//                .aspectRatio(contentMode: .fit)
+//        } placeholder: {
+//            Color.replacement
+//        }
+//        .frame(width: width, height: height, alignment: .center)
+//        .cornerRadius(cornerRadius)
+
     }
     
     init(poster: Image? = nil, width: CGFloat? = nil, height: CGFloat? = nil, cornerRadius: CGFloat = 0) {

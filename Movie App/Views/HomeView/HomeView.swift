@@ -61,7 +61,7 @@ struct HomeView: View {
                             // MARK: Content Categories
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(Array(viewModel.dynamicGenre), id: \.self) { genre in
+                                    ForEach(Array(viewModel.currentGenres), id: \.self) { genre in
                                         Toggle(isOn: viewModel.isGenreSelected(genre)) {
                                             Text(genre)
                                         }
@@ -102,7 +102,7 @@ struct HomeView: View {
             .foregroundColor(viewModel.selectedContentType == type ? .primary : .secondary)
             .onTapGesture {
                 // TODO: with animation
-                viewModel.selectedContentType = type
+                viewModel.changeContentType(to: type)
             }
     }
 }

@@ -14,7 +14,7 @@ struct GenreToggleStyle: ToggleStyle {
             .fontWeight(.medium)
             .frame(height: 25)
             .padding(.horizontal, 15)
-            .foregroundColor(configuration.isOn ? .white : Color.white.opacity(0.7))
+            .foregroundColor(configuration.isOn ? .white : Color.primary.opacity(0.5))
         // TODO: make the other style work
             .build(configuration.isOn) { $0.background(Color.focus).cornerRadius(5) }
             .build(!configuration.isOn) {
@@ -43,6 +43,6 @@ struct GenreToggleStyle_Previews: PreviewProvider {
             .toggleStyle(GenreToggleStyle())
         }
         .padding()
-        .background(.black)
+        .background(Color.background)
     }
 }

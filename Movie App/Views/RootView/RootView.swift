@@ -69,6 +69,7 @@ extension RootView {
             .overlay {
                 Image(systemName: systemName)
                     .font(.system(size: 24))
+                    .foregroundStyle(Color.opposite)
                     .opacity(isActive ? 1 : 0.5)
             }
             .onTapGesture {
@@ -80,6 +81,6 @@ extension RootView {
 struct RootView_Previews: PreviewProvider {
     static var previews: some View {
         RootView()
-            .preferredColorScheme(.dark)
+            .preferredColorScheme(.light)
     }
 }

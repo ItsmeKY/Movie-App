@@ -116,9 +116,9 @@
 			isa = PBXGroup;
 			children = (
 				B7434C912ABE612200E4E90D /* Movie_AppApp.swift */,
+				B7434CA12ABF1A0300E4E90D /* Models */,
 				B76CCF452AC4D42B00755757 /* NetworkManager */,
 				B7434CA02ABF19E600E4E90D /* Views */,
-				B7434CA12ABF1A0300E4E90D /* Models */,
 				B7434CA22ABF1A1000E4E90D /* Resources */,
 				B7434C972ABE612500E4E90D /* Movie_App.entitlements */,
 				B7434C982ABE612500E4E90D /* Preview Content */,

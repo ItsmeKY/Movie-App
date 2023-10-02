@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct DetailsView: View {
     
     // Learned: Environment Object cannot be nested in a class, only views (ie structs)
     @EnvironmentObject private var root: RootViewModel
     @State private var isFavorite: Bool = false
+    @State private var presentTrailerPlayer: Bool = false
 //    private var content: ContentModel
     
 //    init() {
@@ -32,7 +34,7 @@ struct DetailsView: View {
                             .padding(.top, -97)
 
                         
-                        HStack(spacing: 10) {
+                        HStack(spacing: 8) {
                             // MARK: Company Name
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.alertYellow)
@@ -51,7 +53,7 @@ struct DetailsView: View {
                                 }
                             
                             //MARK: Ranking and Views
-                            HStack(spacing: 5) {
+                            HStack(spacing: 3) {
                                 if let rating = root.selectedContent.aggregateRating {
                                     Image(systemName: "star.fill")
                                         .font(.subheadline)
@@ -65,14 +67,23 @@ struct DetailsView: View {
                                         .font(.caption)
                                         .fontWeight(.medium)
                                         .opacity(0.8)
+                                        .padding(.leading, 5)
                                 }
                             }
                             
                             Spacer()
                             
-                            Image("Share")
-                                .resizable()
-                                .frame(width: 21, height: 18, alignment: .center)
+                            ShareLink(item: root.selectedContent.url,
+                                      subject: Text(root.selectedContent.title),
+                                      message: Text(root.selectedContent.description),
+                                      preview: SharePreview(root.selectedContent.title)) {
+                                Image("Share")
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .foregroundStyle(Color.primary)
+                                    .frame(width: 21, height: 18, alignment: .center)
+                            }
+                                      .padding(.trailing, 3)
                             
                             Image(systemName: isFavorite ? "heart.fill" : "heart")
                                 .resizable()
@@ -83,7 +94,7 @@ struct DetailsView: View {
                         .padding(.horizontal)
                         
                         VStack(alignment: .leading, spacing: 15) {
-                            HStack(spacing: 0) {
+                            HStack(spacing: -5) {
                                 // MARK: Title of Content
                                 Text(root.selectedContent.title)
                                     .font(.title2)
@@ -132,7 +143,11 @@ struct DetailsView: View {
                                 .padding(.top, -8)
                         }
                         
-                        Button(action: {}) {
+                        Button(action: {
+                            withAnimation {
+                                presentTrailerPlayer = true
+                            }
+                        }) {
                             RoundedRectangle(cornerRadius: 10)
                                 .frame(height: 48, alignment: .center)
                                 .foregroundColor(.focus)
@@ -152,6 +167,15 @@ struct DetailsView: View {
                     }
                     .edgesIgnoringSafeArea(.top)
                 }
+                
+                if presentTrailerPlayer {
+                    
+                    VideoPlayer(player: AVPlayer(url: root.selectedContent.trailer!.url))
+                        .background(Color.black.ignoresSafeArea())
+                  
+
+                }
+                
             }
             .overlay {
                 Circle()
@@ -187,7 +211,7 @@ struct DetailsView: View {
 struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
         DetailsView()
-            .preferredColorScheme(.dark)
+//            .preferredColorScheme(.dark)
             .environmentObject(RootViewModel())
     }
 }

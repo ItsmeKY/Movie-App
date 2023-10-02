@@ -36,14 +36,18 @@ final class NetworkManager {
 ]
     private let jsonDecoder = JSONDecoder()
     
+    typealias MovieGenre = String
+    typealias SeriesGenre = String
+    
     // -- Move to Singleton
     // -- Make it return [ContentModel] and [Set of genre]
     // -- (do on commit 2) Remove pagination of content info
     // You may keep it for loading images however
     /// Loads all the contents for all the existing content IDs cuncurrently, and also returns a list of unique genres found in the contents
-    func loadContentConcurrent(_ contentIDs: [String], withGenre: Bool) async -> ([ContentModel], [String]) {
+    func loadContentConcurrent(_ contentIDs: [String], withGenre: Bool) async -> ([ContentModel], [MovieGenre], [SeriesGenre]) {
         var all: [ContentModel] = []
-        var genres: Set<String> = Set()
+        var movieGenres: Set<MovieGenre> = Set()
+        var seriesGenres: Set<SeriesGenre> = Set()
         var idTracker: Int = 0
         
         try? await withThrowingTaskGroup(of: ContentModel?.self) { group in
@@ -65,7 +69,8 @@ final class NetworkManager {
                     if withGenre {
                         // Finding Unique Genres
                         for i in safeContent.genre {
-                            genres.insert(i)
+                            if safeContent.type == ContentType.movie.rawValue { movieGenres.insert(i) }
+                            else { seriesGenres.insert(i) }
                         }
                     }
                     
@@ -75,11 +80,13 @@ final class NetworkManager {
             return
         }
         
-        var sortedGenres = Array(genres).sorted()
-        print(sortedGenres.count)
-        sortedGenres.insert("All", at: 0)
-        print(sortedGenres.count)
-        return (all, sortedGenres)
+        var sortedMovieGenres = Array(movieGenres).sorted()
+        sortedMovieGenres.insert("All", at: 0)
+        
+        var sortedSeriesGenres = Array(seriesGenres).sorted()
+        sortedSeriesGenres.insert("All", at: 0)
+        
+        return (all, sortedMovieGenres, sortedSeriesGenres)
     }
     
     // -- Move to Singleton
@@ -124,7 +131,7 @@ final class NetworkManager {
         do {
             let searchResult = try jsonDecoder.decode(SearchModel.self, from: data)
             let contentIDs = searchResult.contentIDs.map { $0.imdbID }
-            let (contents, _) = await self.loadContentConcurrent(contentIDs, withGenre: false)
+            let (contents, _, _) = await self.loadContentConcurrent(contentIDs, withGenre: false)
             print(contents.count)
             return contents
         } catch {

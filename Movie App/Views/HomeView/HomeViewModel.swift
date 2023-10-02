@@ -22,7 +22,10 @@ final class HomeViewModel: ObservableObject {
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0),
         GridItem(.flexible(minimum: 90, maximum: 140), spacing: 0)
     ]
-    var dynamicGenre: [String] = []
+    
+    var currentGenres: [String] = []
+    /// These are either movie or series genres, depending on which the user is currently trying to look at, the one not shown is called seated
+    var seatedGenres: [String] = []
     
     init() {
         // TODO: how about initializing all those variables above and for all other class in inits, is it not cleaner?
@@ -31,13 +34,32 @@ final class HomeViewModel: ObservableObject {
     
     func loadContent() {
         Task {
-            let (contents, genres) = await NetworkManager.shared.loadContentConcurrent(NetworkManager.shared.contentsID, withGenre: true)
+            let (contents, movieGenres, seriesGenres) = await NetworkManager.shared.loadContentConcurrent(NetworkManager.shared.contentsID, withGenre: true)
             
-            DispatchQueue.main.async {
-                self.contents = contents
-                self.dynamicGenre = genres
+            DispatchQueue.main.async { [weak self] in
+                self?.contents = contents
+                
+                // TODO: is this even worth doing as the operation is too quick for the user to try change type before this data arrives?
+                if self?.selectedContentType == .movie {
+                    self?.currentGenres = movieGenres
+                    self?.seatedGenres = seriesGenres
+                } else {
+                    self?.currentGenres = seriesGenres
+                    self?.seatedGenres = movieGenres
+                }
+                
             }
         }
+    }
+    
+    func changeContentType(to type: ContentType) {
+        
+        self.selectedContentType = type
+        // Swap to genres
+        let tempCurrentGenres = self.currentGenres
+        self.currentGenres = self.seatedGenres
+        self.seatedGenres = tempCurrentGenres
+        
     }
     
     // -- Stay

@@ -41,7 +41,7 @@ struct SearchView: View {
                     .background(Color.replacement)
                     .cornerRadius(12)
                     .padding(.horizontal)
-                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                    .shadow(color: .black.opacity(0.08), radius: 5, x: 0, y: 2)
                     
                     
                     // MARK: Posters ScrollView
@@ -68,7 +68,7 @@ struct SearchView: View {
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
-            .preferredColorScheme(.dark)
+//            .preferredColorScheme(.dark)
             .environmentObject(RootViewModel())
     }
 }

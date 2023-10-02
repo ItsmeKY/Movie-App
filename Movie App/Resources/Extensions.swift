@@ -15,6 +15,7 @@ extension Color {
     static let heartRed = Color("Heart Red")
     static let replacement = Color("Replacement")
     static let tabBar = Color("Tab Bar Color")
+    static let opposite = Color("Opposite")
 }
 
 extension View {

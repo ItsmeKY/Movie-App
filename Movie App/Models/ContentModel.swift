@@ -26,8 +26,6 @@ struct ContentModel: Decodable {
     
     var id: Int = -1
     var imdbID: String = ""
-    // TODO: can possibly remove this
-    var poster: Image? = nil
     var isFavorite: Bool = false
     
     enum CodingKeys: String, CodingKey {
@@ -56,8 +54,7 @@ struct ContentModel: Decodable {
                                       genre: ["Action", "Super-Hero", "Adventure", "Sci-fi"],
                                       trailer: .init(url: URL(string: "https://www.imdb.com/video/vi2163260441/")!),
                                       actor: [.init(name: "Robert Downey Jr."), .init(name: "Chris Evans"), .init(name: "Mark Ruffalo")],
-                                      director: [.init(name: "Anthony Russo"), .init(name: "Joe Russo")],
-                                      poster: Image("Avengers Poster"))
+                                      director: [.init(name: "Anthony Russo"), .init(name: "Joe Russo")])
 }
 
 struct AggregateRating: Decodable {

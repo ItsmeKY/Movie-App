@@ -28,7 +28,8 @@ struct FavoritesView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVGrid(columns: gridColumn, spacing: 20) {
                         ForEach(root.favoriteContents.indices, id: \.self) { index in
-                            PosterView(poster: root.favoriteContents[index].poster,
+                            PosterView(poster: root.favoriteContents[index].poster, 
+                                       posterURL: root.favoriteContents[index].posterUrl,
                                        width: 167, height: 245, cornerRadius: 10)
                                 .onTapGesture { root.accessDetailsView(for: index) }
                         }

@@ -94,7 +94,14 @@ final class NetworkManager {
         
         var sortedSeriesGenres = Array(seriesGenres).sorted()
         sortedSeriesGenres.insert("All", at: 0)
-        print(sortedSeriesGenres.count)
+        
+// TODO: to sort content, the indexing method you used to manually create remove it, use UUID(), also remove poster and only keep posterURL
+//        let sortedContent = all.sorted { first, second in
+//            // New unrated movies come first, and then highest ranking to lowest ranking
+//            guard let first = first.aggregateRating?.ratingCount else { return true }
+//            guard let second = second.aggregateRating?.ratingCount else { return false }
+//            return first > second
+//        }
         
         return (all, sortedMovieGenres, sortedSeriesGenres)
     }

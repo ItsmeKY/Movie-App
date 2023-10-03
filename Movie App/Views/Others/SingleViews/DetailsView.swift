@@ -30,7 +30,8 @@ struct DetailsView: View {
                     VStack(spacing: 20) {
                         //MARK: Poster
 
-                        PosterView(poster: root.selectedContent.poster)
+                        PosterView(poster: root.selectedContent.poster, 
+                                   posterURL: root.selectedContent.posterUrl)
                             .padding(.top, -97)
 
                         

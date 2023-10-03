@@ -43,8 +43,13 @@ struct HomeView: View {
                                 HStack(spacing: 10) {
                                     ForEach(viewModel.contents, id: \.id) { content in
                                         if viewModel.contentInFilter(content.id, genreSpecific: false) {
-                                            PosterView(poster: content.poster, width: 170, height: 250, cornerRadius: 10)
+                                            PosterView(poster: content.poster, 
+                                                       posterURL: content.posterUrl,
+                                                       width: 170, height: 250, cornerRadius: 10)
                                                 .onTapGesture { root.accessDetailsView(content) }
+                                                .onAppear {
+                                                    print("poster appeared: \(content.title), state: \(viewModel.contentInFilter(content.id, genreSpecific: false))")
+                                                }
                                         }
                                     }
                                 }
@@ -75,9 +80,10 @@ struct HomeView: View {
                             LazyVGrid(columns: viewModel.gridColumn, spacing: 15) {
                                 ForEach(viewModel.contents, id: \.id) { content in
                                     if viewModel.contentInFilter(content.id, genreSpecific: true) {
-                                        PosterView(poster: content.poster, width: 111, height: 164, cornerRadius: 10)
+                                        PosterView(poster: content.poster, 
+                                                   posterURL: content.posterUrl,
+                                                   width: 111, height: 164, cornerRadius: 10)
                                             .onTapGesture { root.accessDetailsView(content) }
-                                        
                                     }
                                 }
                             }
@@ -103,6 +109,7 @@ struct HomeView: View {
             .onTapGesture {
                 // TODO: with animation
                 viewModel.changeContentType(to: type)
+//                viewModel.selectedContentType = type
             }
     }
 }

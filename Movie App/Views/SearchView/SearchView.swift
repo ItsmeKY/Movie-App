@@ -48,7 +48,8 @@ struct SearchView: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         LazyVGrid(columns: gridColumn, spacing: 20) {
                             ForEach(viewModel.searchContent, id: \.id) { content in
-                                PosterView(poster: content.poster,
+                                PosterView(poster: content.poster, 
+                                           posterURL: content.posterUrl,
                                            width: 167, height: 245, cornerRadius: 10)
                                     .onTapGesture { root.accessDetailsView(content) }
                             }

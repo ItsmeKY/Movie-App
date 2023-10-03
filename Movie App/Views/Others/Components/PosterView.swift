@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CachedAsyncImage
 
 struct PosterView: View {
     
@@ -22,6 +23,9 @@ struct PosterView: View {
                 .background(Color.black.frame(height: height))
         } placeholder: {
             Color.replacement
+                .overlay {
+                    ProgressView()
+                }
         }
         .frame(width: width, height: height, alignment: .center)
         .cornerRadius(cornerRadius)
